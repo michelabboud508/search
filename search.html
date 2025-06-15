@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Search Highlight with Button</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f6f7f9;
+      padding: 60px 20px;
+      color: #1a1a1a;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: auto;
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    h2 {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .post-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .post-date {
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+
+    .post-text {
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    mark {
+      background-color: yellow;
+      padding: 0 2px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Search</h2>
+    <div class="search-row">
+      <input type="text" id="searchBox" placeholder="Type to highlight..." />
+      <button id="searchButton">Search</button>
+    </div>
+    <div id="post">
+      <div class="post-title" id="title">
+        The Future of CSS: Grids and Beyond
+      </div>
+      <div class="post-date">
+        Jun 15, 2025
+      </div>
+      <div class="post-text" id="content">
+        CSS Grid has changed how we approach layout. With properties like grid-template and grid-auto,
+        developers now have powerful tools for both fixed and dynamic designs. Understanding when to use each
+        can elevate your frontend game and lead to cleaner, more maintainable code.
+      </div>
+    </div>
+		
+	
+  </div>
+  <script>
+    const searchBox = document.getElementById("searchBox");
+    const searchButton = document.getElementById("searchButton");
+    const titleEl = document.getElementById("title");
+    const contentEl = document.getElementById("content");
+    const originalTitleHTML = titleEl.innerHTML;
+    const originalContentHTML = contentEl.innerHTML;
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    function walkAndHighlight(node, keyword) {
+      if (node.nodeType === 3) {
+        const pattern = new RegExp(escapeRegExp(keyword), 'gi');
+        const parent = node.parentNode;
+        const frag = document.createDocumentFragment();
+        let lastIndex = 0;
+        let match;
+        while ((match = pattern.exec(node.nodeValue)) !== null) {
+          const before = node.nodeValue.slice(lastIndex, match.index);
+          const matched = node.nodeValue.slice(match.index, pattern.lastIndex);
+          if (before) frag.appendChild(document.createTextNode(before));
+          const mark = document.createElement("mark");
+          mark.textContent = matched;
+          frag.appendChild(mark);
+          lastIndex = pattern.lastIndex;
+        }
+        const after = node.nodeValue.slice(lastIndex);
+        if (after) frag.appendChild(document.createTextNode(after));
+
+        parent.replaceChild(frag, node);
+      } else if (node.nodeType === 1 && node.childNodes && !["SCRIPT", "STYLE"].includes(node.tagName)) {
+        for (let i = 0; i < node.childNodes.length; i++) {
+          walkAndHighlight(node.childNodes[i], keyword);
+        }
+      }
+    }
+
+    function runSearch() {
+      const keyword = searchBox.value.trim();
+      titleEl.innerHTML = originalTitleHTML;
+      contentEl.innerHTML = originalContentHTML;
+      if (keyword) {
+        walkAndHighlight(titleEl, keyword);
+        walkAndHighlight(contentEl, keyword);
+      }
+    }
+    searchButton.addEventListener("click", runSearch);
+  </script>
+</body>
+</html>
